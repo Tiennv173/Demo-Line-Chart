@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Smart pump</title>
+    <link rel="icon" type="image/ico" href="./public/images/logo.png" />
+
+    <script type="text/javascript" src="./node_modules/zingchart/client/zingchart.min.js"></script>
+
+</head>
+<body>
+	<script>
+		var fetchParams = {
+		  method: "GET",
+		  mode: "cors",
+		  cache: "default"
+		};
+
+		var url = "http://localhost/";
+
+		fetch(url, fetchParams)
+			.then(res => {
+				if(!res.ok){
+				throw new Error(res.statusText);
+				}
+				return res.json()
+			})
+			.then(data => {
+				var character = data.results;
+				var dataLength =20; //number of datapoint visible at any poit
+				var seriesData = {
+			        hum: [],
+			        temp: [],
+			        humk: [],
+			        lux: []
+			      };
+
+			    for (var i = 0; i <dataLength; i++) {
+			    	seriesData.hum[i] = parseInt(character[i].param.hum);
+			        seriesData.temp[i] = parseInt(character[i].param.temp);
+			        seriesData.humk[i] = parseInt(character[i].param.humk);
+			        seriesData.lux[i] = parseInt(character[i].param.lux);
+			    };
+			    var updateChart = function() {
+
+			      // Render the chart using the data from Mongo
+			        zingchart.render({
+			        id:"myChart",
+			        width:"100%",
+			        height:400,
+			        data:{
+			          "type":"line",
+			          "title":{
+			            "text":"Dynamic Humidity"
+			          },
+			          "plot":{
+			            "line-width":1,
+			            "aspect":"spline",
+			            "marker":{
+			              "visible":false
+			            }
+			          },
+			          "scale-x": {
+			            "min-value": new Date().getTime()-(1800000*(30-1)),
+			                "shadow": 0,
+			                "step": 1800000,
+			                "transform": {
+			                    "type": "date",
+			                    "all": "%D, %d %M<br />%h:%i %A",
+			                    "guide": {
+			                        "visible": false
+			                    },
+			                    "item": {
+			                        "visible": false
+			                    }}
+			          },
+			          "series":[
+			            {
+			              "values":seriesData['hum'],
+			              "values":seriesData['temp'],
+			              "values":seriesData['humk'],
+			              "values":seriesData['lux']
+			            }
+			          ]
+			        }
+			      });
+			        // dataLength++;
+			        // seriesData['series_0'].push(character[dataLength]['series0']);
+			        // seriesData['series_1'].push(character[dataLength]['series1']);
+			        // seriesData['series_2'].push(character[dataLength]['series2']);
+			        // seriesData['series_3'].push(character[dataLength]['series3']);
+			        // seriesData['series_0'].shift();
+			        // seriesData['series_1'].shift();
+			        // seriesData['series_2'].shift();
+			        // seriesData['series_3'].shift();
+
+			      };
+
+				updateChart();
+
+			})
+	</script>
+</body>
+</html>
